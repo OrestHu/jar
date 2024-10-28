@@ -59,4 +59,38 @@ stateDiagram-v2
     note right of CommentStart
         Line and Block
         comments
+    end note
+    StringContent --> StringContent: not \"
+    StringContent --> Finish: \"
+    
+    CharContent --> CharContent: not '
+    CharContent --> Finish: '
+
+    CommentStart --> LineComment: /
+    CommentStart --> Finish: other
+    
+    LineComment --> LineComment: not newline
+    LineComment --> Start: newline
+    
+    CommentStart --> BlockComment: {
+    BlockComment --> BlockComment: not }
+    BlockComment --> Start: }
+
+    Whitespace --> Start: process_next
+
+    Finish --> Start: process_next
+    
+    note right of Letter
+        Keywords, Identifiers,
+        Program names
+    end note
+
+    note right of QuoteState
+        String and Char
+        literals
+    end note
+
+    note right of CommentStart
+        Line and Block
+        comments
     end not
