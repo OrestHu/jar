@@ -1,40 +1,62 @@
 ```mermaid
 stateDiagram-v2
-    direction LR
+    [*] --> Start
+
+    Start --> Letter: letter
+    Start --> Digit: digit
+    Start --> DelimiterState: delimiter
+    Start --> OperatorState: operator
+    Start --> QuoteState: quote
+    Start --> CommentStart: /
+    Start --> Whitespace: space/tab/newline
+    Start --> [*]: EOF
+
+    Letter --> Letter: letter/digit/_
+    Letter --> Finish: other
     
-    [*] --> Program: назва програми
-    Program --> Start: будь-який символ
+    Digit --> Digit: digit
+    Digit --> Finish: other
+
+    DelimiterState --> Finish: save_token
     
-    Start --> Letter: буква
-    Start --> Digit: цифра
-    Start --> Another: інший символ
-    Start --> Scomment: /
-    Start --> Separators: пробіл|табуляція|\n
-    Start --> EndOfFile: EOF
+    OperatorState --> OperatorState2: potential_two_char
+    OperatorState --> Finish: other
+    OperatorState2 --> Finish: save_token
+
+    QuoteState --> StringContent: \"
+    QuoteState --> CharContent: '
     
-    Letter --> Letter: буква|цифра
-    Letter --> Finish: інший символ
+    StringContent --> StringContent: not \"
+    StringContent --> Finish: \"
     
-    Digit --> Digit: цифра
-    Digit --> Finish: інший символ
+    CharContent --> CharContent: not '
+    CharContent --> Finish: '
+
+    CommentStart --> LineComment: /
+    CommentStart --> Finish: other
     
-    Another --> Finish: будь-який символ
+    LineComment --> LineComment: not newline
+    LineComment --> Start: newline
     
-    Scomment --> Comment: /
-    Scomment --> Finish: інший символ
+    CommentStart --> BlockComment: {
+    BlockComment --> BlockComment: not }
+    BlockComment --> Start: }
+
+    Whitespace --> Start: process_next
+
+    Finish --> Start: process_next
     
-    Comment --> Start: \n
-    
-    Separators --> Start: будь-який символ
-    
-    Finish --> Start: будь-який символ, крім EOF
-    Finish --> EndOfFile: EOF
-    
-    EndOfFile --> EndOfFile: EOF
-    EndOfFile --> [*]
-    
-    note right of Letter: Розпізнавання ідентифікаторів<br/>та ключових слів
-    note right of Digit: Розпізнавання<br/>числових констант
-    note right of Another: Розпізнавання<br/>спеціальних символів
-    note right of Comment: Ігнорування<br/>коментарів
-    note right of Separators: Пропуск пробільних<br/>символів
+    note right of Letter
+        Keywords, Identifiers,
+        Program names
+    end note
+
+    note right of QuoteState
+        String and Char
+        literals
+    end note
+
+    note right of CommentStart
+        Line and Block
+        comments
+    end not
